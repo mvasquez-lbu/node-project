@@ -1,0 +1,16 @@
+{
+  "name": "nodejs-project",
+  "version": "1.0.0",
+  "description": "nodejs project example",
+  "author": "",
+  "license": "MIT",
+  "main": "app.js",
+  "keywords": [
+    "nodejs",
+    "bootstrap",
+    "express"
+  ],
+  "dependencies": {
+    "express": "^4.16.4"
+  }
+}
