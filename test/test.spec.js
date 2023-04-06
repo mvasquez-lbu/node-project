@@ -1,12 +1,16 @@
-const assert = require('assert');
-const app = require('../app');
-const request = require('supertest');
+const app = require("../app");
+const supertest = require("supertest");
 
-describe('GET /', function() {
-    it('responds with 200', function(done) {
-      request(app)
-        .get('/')
-        .expect(200, done);
-    });
+describe("test", () => {
+  after((done) => {
+    app.close(done);
   });
-  
+
+  it("Test 1", (done) => {
+    supertest(app)
+      .get("/")
+      .expect(200, done);
+  });
+});
+
+
