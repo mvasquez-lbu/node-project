@@ -2,6 +2,11 @@ const express = require('express');
 const app = express();
 const router = express.Router();
 
+// Routes go here
+
+module.exports = app;  // Export the app variable
+
+
 const path = __dirname + '/views/';
 const port = 8080;
 

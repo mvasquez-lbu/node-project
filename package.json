@@ -4,6 +4,11 @@
   "description": "nodejs project example",
   "author": "",
   "license": "MIT",
+  "scripts": {
+    "test": "mocha",
+    "start": "npm test && node app.js",
+    "build": "echo Test build completed."
+  },
   "main": "app.js",
   "keywords": [
     "nodejs",
@@ -12,5 +17,9 @@
   ],
   "dependencies": {
     "express": "^4.16.4"
+  },
+  "devDependencies": {
+    "mocha": "^10.2.0",
+    "supertest": "^6.3.3"
   }
 }
