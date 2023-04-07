@@ -63,7 +63,7 @@ stages:
       name: 'Default'
       demands:
       - agent.name -equals self-hosted-windows    
-    environment: 'development' #customize with your environment
+    environment: 'dev' #customize with your environment
     strategy:
       runOnce:
         deploy:
