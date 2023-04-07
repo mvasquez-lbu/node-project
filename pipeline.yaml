@@ -52,6 +52,10 @@ stages:
         tags: |
           latest
       displayName: 'Build and push Docker image'
+    - task: PublishPipelineArtifact@1
+      inputs:
+        artifactName: 'manifests'
+        path: 'manifests'      
 
 - stage: Deploy
   displayName: Deploy stage
@@ -71,7 +75,7 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               artifactName: 'manifests'
-              downloadPath: '$(System.ArtifactsDirectory)\manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
           - task: KubernetesManifest@0
             displayName: Create imagePullSecret
             inputs:
@@ -87,8 +91,8 @@ stages:
               namespace: $(k8sNamespace)
               kubernetesServiceConnection: aks
               manifests: |
-                $(System.ArtifactsDirectory)\manifests\deployment.yml
-                $(System.ArtifactsDirectory)\manifests\service.yml
+                $(System.ArtifactsDirectory)/manifests/deployment.yml
+                $(System.ArtifactsDirectory)/manifests/service.yml
               imagePullSecrets: |
                 $(imagePullSecret)
               containers: |
