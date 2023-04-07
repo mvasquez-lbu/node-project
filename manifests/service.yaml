@@ -5,15 +5,8 @@ metadata:
   labels:
     app: nodeapp
 spec:
-  selector:
-    app: nodeapp
+  type: LoadBalancer
   ports:
-  - name: metrics
-    port: 8000
-    protocol: TCP
-    targetPort: 8000
-  - name: http
-    port: 8080
-    protocol: TCP
-    targetPort: 8080
-  type: ClusterIP
+  - port: 8080
+  selector:
+      app: nodeapp
