@@ -9,37 +9,84 @@ pool:
 
 variables:
   imageRepository: 'monsvt19/azurenodejs'
-  # azureSubscription: '<your-subscription-name>'
-  # resourceGroup: '<your-resource-group-name>'
-  # aksClusterName: '<your-aks-cluster-name>'
-  # dockerfilePath: './Dockerfile'
-  # tag: '$(Build.BuildId)'
+  dockerRegistryServiceConnection: 'dockerhub'
+  imagePullSecret: dockerpullsecret
+  k8sNamespace: default
 
-jobs:
-- job: BuildAndTest
-  displayName: Build & Test
-  steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '14.x'
-    displayName: 'Install Node.js'
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: BuildAndTest
+    displayName: Build & Test
+    pool:
+      name: 'Default'
+      demands:
+      - agent.name -equals self-hosted-windows
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '14.x'
+      displayName: 'Install Node.js'
 
-  - script: |
-      npm install
-      npm ci
-      npm run build --if-present
-      npm run test --if-present
-    displayName: 'npm install, build and test'
-    
-- job: DockerBuildAndPush
-  displayName: Docker build & push
-  steps:
-  - task: Docker@2
-    inputs:
-      containerRegistry: dockerhub
-      repository: '$(imageRepository)'
-      command: 'buildAndPush'
-      dockerfile: './Dockerfile'
-      tags: |
-        latest
-    displayName: 'Build and push Docker image'
+    - script: |
+        npm install
+        npm ci
+        npm run build --if-present
+        npm run test --if-present
+      displayName: 'npm install, build and test'
+      
+  - job: DockerBuildAndPush
+    displayName: Docker build & push
+    pool:
+      name: 'Default'
+      demands:
+      - agent.name -equals self-hosted-windows
+    steps:
+    - task: Docker@2
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: '$(imageRepository)'
+        command: 'buildAndPush'
+        dockerfile: './Dockerfile'
+        tags: |
+          latest
+      displayName: 'Build and push Docker image'
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    displayName: AKS Deployment
+    pool:
+      name: 'Default'
+      demands:
+      - agent.name -equals self-hosted-windows    
+    environment: 'development.default' #customize with your environment
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              artifactName: 'manifests'
+              downloadPath: '$(System.ArtifactsDirectory)/manifests'
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              namespace: $(k8sNamespace)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              namespace: $(k8sNamespace)
+              manifests: |
+                $(System.ArtifactsDirectory)/manifests/deployment.yml
+                $(System.ArtifactsDirectory)/manifests/service.yml
+              imagePullSecrets: |
+                $(imagePullSecret)
+              containers: |
+                $(imageRepository):latest
