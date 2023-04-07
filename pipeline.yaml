@@ -91,8 +91,8 @@ stages:
               namespace: $(k8sNamespace)
               kubernetesServiceConnection: aks
               manifests: |
-                $(System.ArtifactsDirectory)/manifests/deployment.yml
-                $(System.ArtifactsDirectory)/manifests/service.yml
+                $(System.ArtifactsDirectory)/manifests/deployment.yaml
+                $(System.ArtifactsDirectory)/manifests/service.yaml
               imagePullSecrets: |
                 $(imagePullSecret)
               containers: |
