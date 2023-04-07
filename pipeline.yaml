@@ -1,0 +1,44 @@
+trigger:
+- main
+
+pool:
+  name: 'Default'
+  demands:
+   - agent.name -equals self-hosted-windows
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageRepository: 'monsvt19/azurenodejs'
+  # azureSubscription: '<your-subscription-name>'
+  # resourceGroup: '<your-resource-group-name>'
+  # aksClusterName: '<your-aks-cluster-name>'
+  # dockerfilePath: './Dockerfile'
+  # tag: '$(Build.BuildId)'
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '14.x'
+  displayName: 'Install Node.js'
+
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: '$(Build.SourcesDirectory)'
+  displayName: 'Install dependencies'
+
+- task: Npm@1
+  inputs:
+    command: 'test'
+    workingDir: '$(Build.SourcesDirectory)'
+  displayName: 'Run tests'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: dockerhub
+    repository: '$(imageRepository)'
+    command: 'buildAndPush'
+    dockerfile: './Dockerfile'
+    tags: |
+      latest
+  displayName: 'Build and push Docker image'
