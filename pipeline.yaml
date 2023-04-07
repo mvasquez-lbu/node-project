@@ -1,5 +1,5 @@
 trigger:
-- main
+- feature/azure
 
 pool:
   name: 'Default'
