@@ -13,6 +13,7 @@ variables:
   imagePullSecret: dockerpullsecret
   k8sNamespace: default
 
+stages:
 - stage: Build
   displayName: Build stage
   jobs:
