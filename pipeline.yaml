@@ -15,25 +15,31 @@ variables:
   # dockerfilePath: './Dockerfile'
   # tag: '$(Build.BuildId)'
 
-steps:
-- task: NodeTool@0
-  inputs:
-    versionSpec: '14.x'
-  displayName: 'Install Node.js'
+jobs:
+- job: BuildAndTest
+  displayName: Build & Test
+  steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '14.x'
+    displayName: 'Install Node.js'
 
-- script: |
-    npm install
-    npm ci
-    npm run build --if-present
-    npm run test --if-present
-  displayName: 'npm install, build and test'
-
-- task: Docker@2
-  inputs:
-    containerRegistry: dockerhub
-    repository: '$(imageRepository)'
-    command: 'buildAndPush'
-    dockerfile: './Dockerfile'
-    tags: |
-      latest
-  displayName: 'Build and push Docker image'
+  - script: |
+      npm install
+      npm ci
+      npm run build --if-present
+      npm run test --if-present
+    displayName: 'npm install, build and test'
+    
+- job: DockerBuildAndPush
+  displayName: Docker build & push
+  steps:
+  - task: Docker@2
+    inputs:
+      containerRegistry: dockerhub
+      repository: '$(imageRepository)'
+      command: 'buildAndPush'
+      dockerfile: './Dockerfile'
+      tags: |
+        latest
+    displayName: 'Build and push Docker image'
