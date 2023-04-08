@@ -97,4 +97,4 @@ stages:
                 $(imagePullSecret)
               containers: |
                 $(imageRepository):latest
-                
+              
