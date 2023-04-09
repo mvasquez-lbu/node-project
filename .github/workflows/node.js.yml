@@ -101,4 +101,4 @@ jobs:
               monsvt19/nodejs-project:latest
             imagepullsecrets: |
               k8s-secret
-      
+    
