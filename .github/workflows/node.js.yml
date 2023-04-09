@@ -43,7 +43,7 @@ jobs:
           npm run test
   push_to_Docker_Hub:
       # The type of runner that the job will run on
-      runs-on: ubuntu-latest
+      runs-on: self-hosted
       # build docker image and push to docker hub
       # only if the app build and test successfully
       needs: [build_test]
@@ -80,3 +80,36 @@ jobs:
               echo "runing the docker image"
               echo "Testing the nodejs  app endpoints"
               echo ${{ steps.docker_build.outputs.digest }}
+  deploy_to_aks:
+      runs-on: self-hosted
+      # build docker image and push to docker hub
+      # only if the app build and test successfully
+      needs: [push_to_Docker_Hub]
+
+      steps:
+             #Set Kubernetes context (Azure AKS)
+        - uses: azure/aks-set-context@v1
+          with:
+            creds: '${{ secrets.AZURE_CREDENTIALS }}' # Azure credentials
+            resource-group: 'DefaultResourceGroup-WUK'
+            cluster-name: 'nodejsproject'
+          id: login
+
+        - uses: Azure/k8s-create-secret@v1
+          with:
+            container-registry-url: https://index.docker.io/v1/
+            container-registry-username: ${{ secrets.DOCKERHUB_USERNAME }}
+            container-registry-password: ${{ secrets.DOCKERHUB_TOKEN }}
+            secret-name: k8s-secret
+
+      # Deploy to Azure AKS using kubernetes
+        - uses: Azure/k8s-deploy@v1
+          with:
+            manifests: |
+              manifests/deployment.yaml
+              manifests/service.yaml
+            images: |
+              monsvt19/azurenodejs:latest
+            imagepullsecrets: |
+              k8s-secret
+        
