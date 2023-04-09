@@ -51,9 +51,6 @@ jobs:
       steps:
         - name: checkout repo
           uses: actions/checkout@v2
-
-        - name: Set up QEMU
-          uses: docker/setup-qemu-action@v1
       
         - name: Set up Docker Buildx
           uses: docker/setup-buildx-action@v1
@@ -71,15 +68,7 @@ jobs:
             file: ./Dockerfile
             push: true
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/nodejs-project:latest
-          
-        - name: Run the image in a container
-          uses: addnab/docker-run-action@v3
-          with:
-            image: ${{ secrets.DOCKERHUB_USERNAME }}/nodejs-project:latest
-            run: |
-              echo "runing the docker image"
-              echo "Testing the nodejs  app endpoints"
-              echo ${{ steps.docker_build.outputs.digest }}
+
   deploy_to_aks:
       runs-on: self-hosted
       # build docker image and push to docker hub
@@ -109,7 +98,7 @@ jobs:
               manifests/deployment.yaml
               manifests/service.yaml
             images: |
-              monsvt19/azurenodejs:latest
+              monsvt19/nodejs-project:latest
             imagepullsecrets: |
               k8s-secret
         
