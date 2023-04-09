@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: nodeapp
-        image: monsvt19/azurenodejs
+        image: monsvt19/nodejs-project
         imagePullPolicy: Always
         ports:
         - containerPort: 8000
